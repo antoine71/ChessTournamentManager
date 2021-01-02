@@ -1,34 +1,48 @@
-from tinydb import TinyDB
+"""This module contain the main controllers of the program"""
 
 from controllers.new_player import ControllerNewPlayer
 from controllers.new_tournament import ControllerNewTournament
 from controllers.player_display import ControllerPlayerDatabase
 from controllers.tournament_display import ControllerTournamentDatabase
 
-from models import Database, Player, TournamentDatabaseConverter
+from models.database import TournamentDatabaseConverter, PlayerDatabaseConverter
 
-from views import View, ViewPrompt
+from views.general import ViewText, ViewPrompt
 
 
 class ControllerMain:
+    """The main controller is called
+    It will load the players and tournament databases, and instantiate them in Database objects
+    It will then instantiate a ControllerMainMenu"""
 
     def run(self):
-        player_database = Database()
-        tournament_database = Database()
+        player_database = PlayerDatabaseConverter().load_database()
+        tournament_database = TournamentDatabaseConverter().load_database()
 
-        players_db = TinyDB("players_db.json")
-        for item in players_db:
-            player_database.add_data(Player(**item))
-
-        tournament_db = TinyDB("db_tournament.json")
-        for tournament_json in tournament_db:
-            tournament_database.add_data(TournamentDatabaseConverter().load_tournament(tournament_json))
+        # players_db = TinyDB("players_db.json")
+        # for item in players_db:
+        #     player_database.add_data(Player(**item))
+        #
+        # tournament_db = TinyDB("db_tournament.json")
+        # for tournament_json in tournament_db:
+        #     tournament_database.add_data(TournamentDatabaseConverter().load_tournament(tournament_json))
 
         while True:
             ControllerMainMenu(player_database, tournament_database).run()
 
 
-class ControllerNavigation:
+class ControllerCommandInterpreter:
+    """This controller is called to collect a command from the user and call the controller associated with the
+    command.
+    This controller verifies if the user input is valid.
+    The parameters are the following:
+        message: it is a string that will be displayed on the screen, it shall contain the list of possible commands.
+        commands: it is a dictionary.
+                        the keys are the commands that the user shall type
+                        the values are the controllers that shall be called by the commands. the controllers shall have
+                        method run()
+        return_to_menu: True command to implement a return to main menu command, False otherwise.
+    """
 
     def __init__(self, message, commands, return_to_menu=True):
         self.commands = commands
@@ -42,23 +56,24 @@ class ControllerNavigation:
         return user_command in self.commands
 
     def run(self):
-        View(self.message).show()
+        ViewText(self.message).show()
         user_command = ViewPrompt('Saississez votre commande : ').show()
         while not self.is_user_command_valid(user_command):
-            user_command = ViewPrompt('Commande Invalide. Veuillez réessayer : ').show()
+            user_command = ViewPrompt('Commande invalide. Veuillez réessayer : ').show()
         controller = self.commands[user_command]
         controller.run()
 
 
 class ControllerMainMenu:
+    """This controller is called to display the program main menu"""
 
     def __init__(self, player_database, tournament_database):
         self.player_database = player_database
         self.tournament_database = tournament_database
 
     def run(self):
-        View("Chess Tournament Manager - Menu principal.").show()
-        ControllerNavigation(
+        ViewText("Chess Tournament Manager - Menu principal.").show()
+        ControllerCommandInterpreter(
             "\t(1) Ajouter un joueur\n"
             "\t(2) Ajouter un Tournoi\n"
             "\t(3) Voir les joueurs\n"

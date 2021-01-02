@@ -1,10 +1,16 @@
-from models import Player, PlayerDatabaseConverter
-import controllers.database_management as dbm
+"""This module contains the controllers related to the creation of a new player"""
 
-from views import ViewPrompt, View
+from models.player import Player
+
+from controllers.database_management import ControllerSavePlayer
+
+from views.general import ViewPrompt, ViewText
 
 
 class ControllerNewPlayer:
+    """This controller is called to create a new player and add it to the database.
+    It will request the input data from the user, instantiate a Player object, add the player to the
+    players Database object and save the new player to the TinyDB json file"""
 
     def __init__(self, database):
         self.database = database
@@ -17,6 +23,6 @@ class ControllerNewPlayer:
                               'Date de naissance : ',
                               'classement : '
                           ]])
-        self.database.add_data(player)
-        View("Création du joueur terminée avec succès.").show()
-        dbm.ControllerSavePlayer(player).run()
+        self.database.append(player)
+        ViewText("Création du joueur terminée avec succès.").show()
+        ControllerSavePlayer(player).run()

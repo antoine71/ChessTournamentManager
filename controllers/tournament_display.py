@@ -1,12 +1,14 @@
+"""This module groups the class related to the display of players"""
+
 import controllers.main_controllers as mc
 from controllers.play_tournament import ControllerPlayTournament
 
-from models import Database
-
-from views import ViewDatabase, ViewTournamentDetails, ViewScoreTable, ViewTournamentResult
+from views.database import ViewDatabase
+from views.tournament import ViewTournamentDetails, ViewScoreTable, ViewTournamentResult
 
 
 class ControllerTournamentDatabase:
+    """This class manages the display of the list of tournaments"""
 
     def __init__(self, tournament_database):
         self.tournament_database = tournament_database
@@ -17,15 +19,17 @@ class ControllerTournamentDatabase:
                             'name', 'start_date', 'end_date')
         view.show()
 
-        mc.ControllerNavigation(
+        mc.ControllerCommandInterpreter(
             "(X) Saississez le numéro d'un tournoi pour afficher le rapport du tournoi",
             {
                 str(i): ControllerTournamentReport(self.tournament_database[i])
-                for i in range(len(self.tournament_database.data))
-            }).run()
+                for i in range(len(self.tournament_database))
+            }
+        ).run()
 
 
 class ControllerTournamentReport:
+    """This class manages the display of the tournament report"""
 
     def __init__(self, tournament):
         self.tournament = tournament
@@ -33,7 +37,7 @@ class ControllerTournamentReport:
     def run(self):
         ViewTournamentDetails("Détails du Tournoi", self.tournament).show()
         ViewDatabase(
-            Database(self.tournament.players),
+            self.tournament.players,
             "Liste des joueurs engagés",
             'last_name', 'first_name', 'date_of_birth', 'ranking',
             selection_mode=False,
@@ -48,4 +52,4 @@ class ControllerTournamentReport:
         else:
             commands_message = ""
             commands_list = {}
-        mc.ControllerNavigation(commands_message, commands_list).run()
+        mc.ControllerCommandInterpreter(commands_message, commands_list).run()

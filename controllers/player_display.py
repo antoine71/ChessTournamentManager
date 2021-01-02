@@ -1,9 +1,12 @@
+"""This module groups the controllers related to the display of players"""
+
 import controllers.main_controllers as mc
 
-from views import ViewDatabase
+from views.database import ViewDatabase
 
 
 class ControllerPlayerDatabase:
+    """This class manages the display of the list of players"""
 
     def __init__(self, player_database, sort_by_attribute="last_name"):
         self.player_database = player_database
@@ -16,7 +19,7 @@ class ControllerPlayerDatabase:
                             selection_mode=False, sort_by_attribute=self.sort_by_attribute)
         view.show()
 
-        mc.ControllerNavigation(
+        mc.ControllerCommandInterpreter(
             "(n) Trier par nom de famille\n"
             "(c) Trier par classement",
             {
