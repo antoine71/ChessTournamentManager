@@ -1,3 +1,3 @@
-from controllers import ControllerMain
+from controllers.main_controllers import ControllerMain
 
 ControllerMain().run()

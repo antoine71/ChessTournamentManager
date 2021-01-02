@@ -1,2 +1,2 @@
-def check_date_format:
+def check_date_format():
     pass
