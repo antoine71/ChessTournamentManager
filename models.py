@@ -5,8 +5,10 @@ from tinydb import TinyDB, Query
 
 class Database:
 
-    def __init__(self):
-        self.data = []
+    def __init__(self, data=None):
+        if data is None:
+            data = []
+        self.data = data
 
     def add_data(self, data):
         self.data.append(data)

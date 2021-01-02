@@ -1,9 +1,8 @@
 from tinydb import TinyDB
 
 from models import Database, Player, Tournament, TournamentDatabaseConverter, PlayerDatabaseConverter
-from views import View, ViewPrompt, ViewChoosePlayer
-
-from operator import itemgetter
+from views import View, ViewPrompt, ViewChoosePlayer, ViewDatabase, ViewScoreTable, ViewTournamentResult, \
+    ViewTournamentDetails, ViewRoundResult
 
 
 class Controller:
@@ -49,6 +48,17 @@ class ControllerSaveTournament:
 
     def run(self):
         TournamentDatabaseConverter().save_tournament(self.tournament)
+        View("Sauvegarde de la base de données Tournoi.").show()
+
+
+class ControllerSavePlayer:
+
+    def __init__(self, player):
+        self.player = player
+
+    def run(self):
+        PlayerDatabaseConverter().save_player(self.player)
+        View("Sauvegarde de la base de données Joueurs.").show()
 
 
 class ControllerMainMenu(Controller):
@@ -77,46 +87,47 @@ class ControllerView(Controller):
 
 class ControllerNavigation:
 
-    def run(self, commands, user_command):
-        controller = commands[user_command]
-        return controller
+    def __init__(self, message, commands, return_to_menu=True):
+        self.commands = commands
+        if return_to_menu:
+            self.commands['m'] = Controller()
+            self.message = "(m) Retour au menu principal" if not message else message + "\n(m) Retour au menu principal"
+        else:
+            self.message = message
+
+    def is_user_command_valid(self, user_command):
+        return user_command in self.commands
+
+    def run(self):
+        View(self.message).show()
+        user_command = ControllerView(ViewPrompt('Saississez votre commande : ')).run()
+        while not self.is_user_command_valid(user_command):
+            user_command = ControllerView(ViewPrompt('Commande Invalide. Veuillez réessayer : ')).run()
+        controller = self.commands[user_command]
+        controller.run()
 
 
 class ControllerPlayerDatabase:
 
-    def __init__(self, player_database, sort_by="last_name", reverse_=False):
+    def __init__(self, player_database, sort_by_attribute="last_name"):
         self.player_database = player_database
-        self.player_database.sort_by(sort_by, reverse_)
+        self.sort_by_attribute = sort_by_attribute
 
     def run(self):
-        ControllerView(View("Base de données des joueurs")).run()
-        players_list_string_output = "\n".join(
-            [
-                "{}, {} - Né(e) le {} - Classement: {}".format(
-                    player.last_name,
-                    player.first_name,
-                    player.date_of_birth,
-                    player.ranking
-                )
-                for player in self.player_database
-            ]
-        )
-        ControllerView(View(players_list_string_output)).run()
-        ControllerView(View(
-            """Commandes:
-            (n) Trier par nom de famille
-            (c) Trier par classement
-            (m) Retour au menu"""
-        )).run()
-        user_command = ControllerView(ViewPrompt('Saississez votre commande : ')).run()
-        controller = ControllerNavigation().run(
+        view = ViewDatabase(self.player_database,
+                            "Base de données des Joueurs",
+                            'last_name', 'first_name', 'date_of_birth', 'ranking',
+                            selection_mode=False, sort_by_attribute=self.sort_by_attribute)
+        view.show()
+
+        ControllerNavigation(
+            "(n) Trier par nom de famille\n"
+            "(c) Trier par classement",
             {
-                'n': ControllerPlayerDatabase(self.player_database, sort_by="last_name", reverse_=False),
-                'c': ControllerPlayerDatabase(self.player_database, sort_by="ranking", reverse_=True),
-                'm': Controller(),
+                'n': ControllerPlayerDatabase(self.player_database, sort_by_attribute="last_name"),
+                'c': ControllerPlayerDatabase(self.player_database, sort_by_attribute="ranking")
             },
-            user_command)
-        controller.run()
+        ).run()
 
 
 class ControllerTournamentDatabase:
@@ -125,139 +136,52 @@ class ControllerTournamentDatabase:
         self.tournament_database = tournament_database
 
     def run(self):
-        ControllerView(View("Base de données des tournois")).run()
-        tournament_list_string_output = "\n".join(
-            [
-                "({}) - {} - du {} au {} - Contrôle du temps: {} - status: {}".format(
-                    i,
-                    tournament.name,
-                    tournament.start_date,
-                    tournament.end_date,
-                    tournament.time_control,
-                    tournament.status
-                )
-                for i, tournament in enumerate(self.tournament_database)
-            ]
-        )
-        ControllerView(View(tournament_list_string_output)).run()
-        ControllerView(View(
-            """Commandes:
-            Saississez le numéro d'un tournoi pour afficher les détails ou
-            (m) Revenir au menu principal"""
-        )).run()
-        user_command = ControllerView(ViewPrompt('Saississez votre commande : ')).run()
-        if user_command.isdigit():
-            controller = ControllerTournamentDetailNavigation(self.tournament_database, int(user_command)).run()
-        else:
-            controller = ControllerNavigation().run(
-                {
-                    'm': Controller(),
-                },
-                user_command)
-        controller.run()
+        view = ViewDatabase(self.tournament_database,
+                            "Base de données des Tournois",
+                            'name', 'start_date', 'end_date')
+        view.show()
+
+        ControllerNavigation(
+            "(X) Saississez le numéro d'un tournmoi pour afficher le rapport du tournoi",
+            {
+                str(i): ControllerTournamentReport(self.tournament_database[i])
+                for i in range(len(self.tournament_database.data))
+            }).run()
 
 
-class ControllerTournamentDetailNavigation:
-
-    def __init__(self, tournament_database, tournament_number):
-        self.tournament_database = tournament_database
-        self.tournament_number = tournament_number
-
-    def run(self):
-        return ControllerTournamentDetail(self.tournament_database[self.tournament_number])
-
-
-class ControllerTournamentDetail:
+class ControllerTournamentReport:
 
     def __init__(self, tournament):
         self.tournament = tournament
 
     def run(self):
-        ControllerView(View("Détails du tournoi:")).run()
-        string_output = "\n".join([
-            "\tNom : {}".format(self.tournament.name),
-            "\tDescription : {}".format(self.tournament.description),
-            "\tDate de début : {}".format(self.tournament.start_date),
-            "\tDate de fin : {}".format(self.tournament.end_date),
-            "\tNombre de rounds : {}".format(self.tournament.number_of_rounds),
-            "\tContrôle du temps : {}".format(self.tournament.time_control),
-            "\tStatus : {}".format(self.tournament.status),
-        ])
-        ControllerView(View(string_output)).run()
-        ControllerView(View("Joueurs engagés:")).run()
-        for player in self.tournament.players:
-            ControllerPlayerDetail(player).run()
-        ControllerView(View("Classement:")).run()
-        ControllerScoreTable(self.tournament.score_table).run()
-        ControllerView(View("Résultats des matchs:")).run()
-        if not self.tournament.rounds:
-            ControllerView(View("\tPas disponible")).run()
+        ViewTournamentDetails("Détails du Tournoi", self.tournament).show()
+        ViewDatabase(
+            Database(self.tournament.players),
+            "Liste des joueurs engagés",
+            'last_name', 'first_name', 'date_of_birth', 'ranking',
+            selection_mode=False,
+            sort_by_attribute="last_name"
+        ).show()
+        ViewScoreTable("Classement:", self.tournament.score_table).show()
+        ViewTournamentResult("Résultats du Tournoi:", self.tournament).show()
+
+        if self.tournament.status != "terminé":
+            commands_message = "(j) Jouer / reprendre le tournoi"
+            commands_list = {"j": ControllerPlayTournament(self.tournament)}
         else:
-            for round_ in self.tournament.rounds:
-                ControllerRoundDetail(round_).run()
-        user_command = ControllerView(ViewPrompt('Saississez votre commande : ')).run()
-        if user_command == "p":
-            ControllerPlayTournament(self.tournament).run()
+            commands_message = ""
+            commands_list = {}
+        ControllerNavigation(commands_message, commands_list).run()
 
 
-class ControllerScoreTable:
-
-    def __init__(self, score_table):
-        self.score_table = score_table
-
-    def run(self):
-        if not self.score_table.score_table:
-            string_output = "\tPas disponible"
-        else:
-            sorted_score_table = sorted(self.score_table.score_table.items(), key=itemgetter(1), reverse=True)
-            string_output = "\n".join([
-                "\t{}: {}".format(player, score)
-                for player, score in sorted_score_table
-            ])
-        ControllerView(View(string_output)).run()
-
-
-class ControllerPlayerDetail:
-
-    def __init__(self, player):
-        self.player = player
-
-    def run(self):
-        string_output = "\t{}, {} - Né(e) le {} - Classement: {}".format(
-                self.player.last_name,
-                self.player.first_name,
-                self.player.date_of_birth,
-                self.player.ranking
-        )
-        ControllerView(View(string_output)).run()
-
-
-class ControllerRoundDetail:
+class ControllerDrawGames:
 
     def __init__(self, round_):
         self.round_ = round_
 
     def run(self):
-        ControllerView(View("\t{} - {}".format(self.round_.name, self.round_.status))).run()
-        if not self.round_.games:
-            ControllerView(View("\t\tPas disponible")).run()
-        else:
-            for game in self.round_.games:
-                ControllerGameDetail(game).run()
-
-
-class ControllerGameDetail:
-
-    def __init__(self, game):
-        self.game = game
-
-    def run(self):
-        match_result_string_output = "\t".join([
-            "\t\t{}: {}".format(player, score)
-            for player, score in self.game.score_table.score_table.items()
-        ])
-        string_output = ' - '.join([self.game.status, match_result_string_output])
-        ControllerView(View(string_output)).run()
+        self.round_.draw_games()
 
 
 class ControllerPlayTournament(Controller):
@@ -267,30 +191,35 @@ class ControllerPlayTournament(Controller):
 
     def run(self):
         self.tournament.play_tournament()
-        ControllerView(View("Démarrage du tournoi")).run()
+        View("Démarrage du tournoi").show()
         for round_ in self.tournament.rounds:
             if round_.status == "terminé":
-                ControllerRoundDetail(round_).run()
+                ViewRoundResult(round_).show()
             else:
                 while round_.status != "terminé":
-                    ControllerRoundDetail(round_).run()
+                    ViewRoundResult(round_).show()
                     if round_.status == "pas encore commencé":
-                        user_command = ControllerView(ViewPrompt('(t) Procéder au tirage des matchs : ')).run()
-                        if user_command == "t":
-                            round_.draw_games()
-                            ControllerSaveTournament(self.tournament).run()
-                            continue
-                    else:
-                        user_command = ControllerView(ViewPrompt('Entrez le résultat du match (numéro du match) : ')).run()
-                        ControllerEnterResults(round_.games[int(user_command) - 1]).run()
+                        ControllerNavigation(
+                            "(t) Procéder au tirage des matchs",
+                            {"t": ControllerDrawGames(round_)}
+                        ).run()
                         ControllerSaveTournament(self.tournament).run()
-                ControllerRoundDetail(round_).run()
-        ControllerView(View("Tournoi Terminé")).run()
-        user_command = ControllerView(ViewPrompt('(r) Afficher le rapport de tournoi ou (m) menu: ')).run()
-        if user_command == "r":
-            ControllerTournamentDetail(self.tournament).run()
-        else:
-            Controller().run()
+                        continue
+                    else:
+                        ControllerNavigation(
+                            "(X) Entrer le résultat du match X",
+                            {
+                                str(i): ControllerEnterResults(round_.games[i])
+                                for i in range(len(round_.games))
+                            }
+                        ).run()
+                        ControllerSaveTournament(self.tournament).run()
+                ViewRoundResult(round_).show()
+        View("Tournoi Terminé").show()
+        ControllerNavigation(
+            "(r) Afficher le rapport de tournoi",
+            {"r": ControllerTournamentReport(self.tournament)}
+        ).run()
 
 
 class ControllerEnterResults(Controller):
@@ -299,9 +228,29 @@ class ControllerEnterResults(Controller):
         self.game = game
 
     def run(self):
-        ControllerView(View("{} VS {}".format(self.game.pair[0], self.game.pair[1]))).run()
-        user_command = ControllerView(ViewPrompt('Entrez le résultat (1 / 2 / n) : ')).run()
-        self.game.update_result(user_command)
+        if self.game.status == "terminé":
+            View("Le match est déja joué.").show()
+        else:
+            ControllerView(View("{} VS {}".format(self.game.pair[0], self.game.pair[1]))).run()
+            ControllerNavigation(
+                "(1 / n / 2) Entrez le résultat\n"
+                "(a) Annuler",
+                {
+                    "1": ControllerUpdateResult(self.game, "1"),
+                    "n": ControllerUpdateResult(self.game, "n"),
+                    "2": ControllerUpdateResult(self.game, "2"),
+                    "a": Controller()
+                }).run()
+
+
+class ControllerUpdateResult:
+
+    def __init__(self, game, result):
+        self.game = game
+        self.result = result
+
+    def run(self):
+        self.game.update_result(self.result)
 
 
 class ControllerNewPlayer(Controller):
@@ -319,6 +268,7 @@ class ControllerNewPlayer(Controller):
                           ]])
         self.database.add_data(player)
         PlayerDatabaseConverter().save_player(player)
+        View("Création du joueur terminée avec succès.").show()
         return self.database
 
 
@@ -341,6 +291,7 @@ class ControllerNewTournament(Controller):
         tournament.players = ControllerChoosePlayer(self.player_database).run()
         self.tournament_database.add_data(tournament)
         ControllerSaveTournament(tournament).run()
+        View("Création du tournoi terminée avec succès.").show()
         return self.tournament_database
 
 
@@ -350,9 +301,35 @@ class ControllerChoosePlayer:
         self.player_database = player_database
 
     def run(self):
-        ControllerView(ViewChoosePlayer(self.player_database)).run()
+        ViewDatabase(
+            self.player_database,
+            "Sélection des joueurs:",
+            "last_name", "first_name", "date_of_birth", "ranking",
+            sort_by_attribute="last_name"
+        ).show()
         tournament_players = []
         while len(tournament_players) < Tournament.NUMBER_OF_PLAYERS:
-            user_command = int(ControllerView(ViewPrompt('Choisissez un joueur : ')).run())
-            tournament_players.append(self.player_database.data[user_command])
+            ControllerNavigation(
+                "(X) Choisir un joueur par son numéro",
+                {
+                    str(i): ControllerAddPlayer(tournament_players, self.player_database.data[i])
+                    for i in range(len(self.player_database.data))
+                }
+            ).run()
         return tournament_players
+
+
+class ControllerAddPlayer:
+
+    def __init__(self, tournament_players_list, player):
+        self.tournament_players_list = tournament_players_list
+        self.player = player
+
+    def run(self):
+        if self.player in self.tournament_players_list:
+            View("Saisie non valide, {} {} est déjà inscrit au tournoi"
+                 .format(self.player.first_name, self.player.last_name)).show()
+        else:
+            self.tournament_players_list.append(self.player)
+            View("{} {} est inscrit au tournoi."
+                 .format(self.player.first_name, self.player.last_name)).show()
