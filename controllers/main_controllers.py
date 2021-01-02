@@ -19,14 +19,6 @@ class ControllerMain:
         player_database = PlayerDatabaseConverter().load_database()
         tournament_database = TournamentDatabaseConverter().load_database()
 
-        # players_db = TinyDB("players_db.json")
-        # for item in players_db:
-        #     player_database.add_data(Player(**item))
-        #
-        # tournament_db = TinyDB("db_tournament.json")
-        # for tournament_json in tournament_db:
-        #     tournament_database.add_data(TournamentDatabaseConverter().load_tournament(tournament_json))
-
         while True:
             ControllerMainMenu(player_database, tournament_database).run()
 

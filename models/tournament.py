@@ -39,6 +39,14 @@ class Tournament:
         new_round.draw_games()
         self.rounds.append(new_round)
 
+    def __hash__(self):
+        return hash((self.name, self.start_date, self.end_date, self.time_control))
+
+    def __eq__(self, other_tournament):
+        return (self.name, self.start_date, self.end_date, self.time_control) == \
+               (other_tournament.name, other_tournament.start_date, other_tournament.end_date,
+                other_tournament.time_control)
+
     def __repr__(self):
         return list.__repr__(list(self.__dict__.values()))
 

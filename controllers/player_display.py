@@ -16,7 +16,7 @@ class ControllerPlayerDatabase:
         view = ViewDatabase(self.player_database,
                             "Base de données des Joueurs",
                             'last_name', 'first_name', 'date_of_birth', 'ranking',
-                            selection_mode=False, sort_by_attribute=self.sort_by_attribute)
+                            selection_mode=True, sort_by_attribute=self.sort_by_attribute)
         view.show()
 
         mc.ControllerCommandInterpreter(

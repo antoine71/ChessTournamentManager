@@ -23,6 +23,10 @@ class ControllerNewPlayer:
                               'Date de naissance : ',
                               'classement : '
                           ]])
-        self.database.append(player)
-        ViewText("Création du joueur terminée avec succès.").show()
-        ControllerSavePlayer(player).run()
+        if player not in self.database:
+            self.database.append(player)
+            ViewText("Création du joueur terminée avec succès.").show()
+            ControllerSavePlayer(player).run()
+        else:
+            ViewText("Erreur: le joueur existe déjà (même nom, prénom et date de naissance).").show()
+

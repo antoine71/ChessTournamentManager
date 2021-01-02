@@ -28,11 +28,13 @@ class ControllerNewTournament:
                                       'Nombre de rounds: ',
                                       'Controle du temps: '
                                   ]])
-        tournament.players = ControllerChoosePlayer(self.player_database).run()
-        self.tournament_database.append(tournament)
-        ViewText("Création du tournoi terminée avec succès.").show()
-        ControllerSaveTournament(tournament).run()
-        return self.tournament_database
+        if tournament not in self.tournament_database:
+            tournament.players = ControllerChoosePlayer(self.player_database).run()
+            self.tournament_database.append(tournament)
+            ViewText("Création du tournoi terminée avec succès.").show()
+            ControllerSaveTournament(tournament).run()
+        else:
+            ViewText("Erreur: le tournoi existe déjà (même nom, dates, contrôle du temps.").show()
 
 
 class ControllerChoosePlayer:

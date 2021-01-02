@@ -14,7 +14,8 @@ class Player:
         return hash((self.last_name, self.first_name, self.date_of_birth))
 
     def __eq__(self, other_player):
-        return self.__dict__ == other_player.__dict__
+        return (self.last_name, self.first_name, self.date_of_birth) == \
+               (other_player.last_name, other_player.first_name, other_player.date_of_birth)
 
     def __repr__(self):
         return "{} {}".format(self.first_name, self.last_name)

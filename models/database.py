@@ -18,6 +18,11 @@ class PlayerDatabaseConverter:
     def load_database(self):
         return [Player(**item) for item in self.db]
 
+    def delete_player(self, player):
+        self.db.remove((Query().last_name == player.last_name)
+                       & (Query().first_name == player.first_name)
+                       & (Query().date_of_birth == player.date_of_birth))
+
 
 class TournamentDatabaseConverter:
     """This class converts Tournament objects to json and vice versa"""
