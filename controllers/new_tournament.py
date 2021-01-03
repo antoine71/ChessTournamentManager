@@ -3,10 +3,12 @@
 import controllers.main_controllers as mc
 from controllers.database_management import ControllerSaveTournament
 
-from models.tournament import Tournament
+from models.tournament import Tournament, TournamentDataValidator
 
 from views.general import ViewPrompt, ViewText
 from views.database import ViewDatabase
+
+import utils
 
 
 class ControllerNewTournament:
@@ -19,15 +21,24 @@ class ControllerNewTournament:
         self.player_database = player_database
 
     def run(self):
-        tournament = Tournament(*[ViewPrompt(variable).show() for variable in
-                                  [
-                                      'Nom : ',
-                                      'Description : ',
-                                      'Date de début : ',
-                                      'date de fin : ',
-                                      'Nombre de rounds: ',
-                                      'Controle du temps: '
-                                  ]])
+        tournament_data = []
+        validator = TournamentDataValidator()
+        prompt = (
+            ('Nom (max. 50 caractères): ', validator.is_name_ok),
+            ('Description (max. 50 caractères): ', validator.is_description_ok),
+            ('Date de début (jj/mm/aaaa): ', validator.is_start_date_ok),
+            ('Date de fin (jj/mm/aaaa): ', validator.is_end_date_ok),
+            ('Nombre de rounds:  (entier positif, par défaut: 4): ', validator.is_number_of_rounds_ok),
+            ('Contrôle du temps (blitz / bullet / coup rapide): ', validator.is_time_control_ok)
+        )
+        for message, check_function in prompt:
+            user_input = ViewPrompt(message).show()
+            while not check_function(user_input):
+                ViewText("Erreur de saisie, veuillez recommencer.").show()
+                user_input = ViewPrompt(message).show()
+            tournament_data.append(user_input)
+        tournament = Tournament(*tournament_data)
+
         if tournament not in self.tournament_database:
             tournament.players = ControllerChoosePlayer(self.player_database).run()
             self.tournament_database.append(tournament)
@@ -56,8 +67,8 @@ class ControllerChoosePlayer:
             mc.ControllerCommandInterpreter(
                 "(X) Choisir un joueur par son numéro",
                 {
-                    str(i): ControllerAddPlayer(tournament_players, self.player_database.data[i])
-                    for i in range(len(self.player_database.data))
+                    str(i): ControllerAddPlayer(tournament_players, self.player_database[i])
+                    for i in range(len(self.player_database))
                 }
             ).run()
         return tournament_players

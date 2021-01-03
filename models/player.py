@@ -1,5 +1,9 @@
 """This module groups the classes related to the player models"""
 
+import utils.utils as utils
+
+from models.date import  Date
+
 
 class Player:
     """This class describes a player"""
@@ -7,7 +11,7 @@ class Player:
     def __init__(self, last_name, first_name, date_of_birth, ranking):
         self.last_name = last_name
         self.first_name = first_name
-        self.date_of_birth = date_of_birth
+        self.date_of_birth = Date(date_of_birth)
         self.ranking = int(ranking)
 
     def __hash__(self):
@@ -19,3 +23,21 @@ class Player:
 
     def __repr__(self):
         return "{} {}".format(self.first_name, self.last_name)
+
+
+class PlayerDataValidator:
+    """This class contains methods used to validate parameters before creating a Player object"""
+
+    def is_last_name_ok(self, last_name):
+        return utils.check_string_length(last_name, 50)
+
+    def is_first_name_ok(self, first_name):
+        return utils.check_string_length(first_name, 50)
+
+    def is_date_of_birth_ok(self, date_of_birth):
+        return utils.is_date_format_dd_mm_yyyy(date_of_birth)
+
+    def is_ranking_ok(self, ranking):
+        return utils.is_positive_integer(ranking)
+
+

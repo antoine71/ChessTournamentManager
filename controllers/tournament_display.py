@@ -1,7 +1,9 @@
 """This module groups the class related to the display of players"""
 
 import controllers.main_controllers as mc
+from controllers.database_management import ControllerDeleteTournament
 from controllers.play_tournament import ControllerPlayTournament
+from controllers.database_management import ControllerDeleteTournament
 
 from views.database import ViewDatabase
 from views.tournament import ViewTournamentDetails, ViewScoreTable, ViewTournamentResult
@@ -16,15 +18,25 @@ class ControllerTournamentDatabase:
     def run(self):
         view = ViewDatabase(self.tournament_database,
                             "Base de données des Tournois",
-                            'name', 'start_date', 'end_date')
+                            'name', 'start_date', 'end_date', 'status',
+                            sort_by_attribute="start_date",
+                            sort_order=True)
         view.show()
 
-        mc.ControllerCommandInterpreter(
-            "(X) Saississez le numéro d'un tournoi pour afficher le rapport du tournoi",
-            {
-                str(i): ControllerTournamentReport(self.tournament_database[i])
+        commands = {
+            "supprimer " + str(i + 1): ControllerDeleteTournament(self.tournament_database[i], self.tournament_database)
+            for i in range(len(self.tournament_database))
+        }
+        commands.update({
+                str(i + 1): ControllerTournamentReport(self.tournament_database[i])
                 for i in range(len(self.tournament_database))
             }
+        )
+
+        mc.ControllerCommandInterpreter(
+            "(X) Saississez le numéro d'un tournoi pour afficher le rapport du tournoi\n"
+            "(supprimer X) Supprimer le tournoi",
+            commands
         ).run()
 
 
@@ -52,4 +64,5 @@ class ControllerTournamentReport:
         else:
             commands_message = ""
             commands_list = {}
-        mc.ControllerCommandInterpreter(commands_message, commands_list).run()
+
+        mc.ControllerCommandInterpreter(commands_message, commands_list, ).run()

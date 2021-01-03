@@ -24,7 +24,7 @@ class ControllerPlayTournament:
                 ViewRoundResult(round_).show()
             else:
                 while round_.status != "terminé":
-                    ViewRoundResult(round_).show()
+                    ViewRoundResult(round_, mode_view_results=False).show()
                     if round_.status == "pas encore commencé":
                         mc.ControllerCommandInterpreter(
                             "(t) Procéder au tirage des matchs",
@@ -36,7 +36,7 @@ class ControllerPlayTournament:
                         mc.ControllerCommandInterpreter(
                             "(X) Entrer le résultat du match X",
                             {
-                                str(i): ControllerEnterResults(round_.games[i])
+                                str(i + 1): ControllerEnterResults(round_.games[i])
                                 for i in range(len(round_.games))
                             }
                         ).run()

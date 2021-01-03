@@ -4,6 +4,8 @@ from views.general import ViewText
 
 from operator import attrgetter
 
+from utils.utils import resize_string
+
 
 class ViewDatabase:
     """This view displays the content of a Database object as a table on the screen. The constructor parameters are
@@ -15,25 +17,28 @@ class ViewDatabase:
         can be used as a command
         sort_by_attribute (string): the attribute that shall be used to sort the table"""
 
-    def __init__(self, database, title, *attributes, selection_mode=True, sort_by_attribute="name"):
+    def __init__(self, database, title, *attributes, selection_mode=True, sort_by_attribute="name", sort_order=True):
         self.database = database
         self.title = title
         self.attributes = attributes
         self.selection_mode = selection_mode
         self.sort_by_attribute = sort_by_attribute
+        self.sort_order = sort_order
 
     def show(self):
         ViewText(self.title).show()
-        self.database.sort(key=attrgetter(self.sort_by_attribute))
+        self.database.sort(key=attrgetter(self.sort_by_attribute), reverse=self.sort_order)
         data_list_string_output = "\n".join(
             [
-                self.highlight_command(i) + "\t".join([str(data.__dict__[attribute]) for attribute in self.attributes])
+                resize_string(self.highlight_command(i + 1), 6)
+                + "".join([resize_string(str(data.__getattribute__(attribute)), 25)
+                           for attribute in self.attributes])
                 for i, data in enumerate(self.database)
             ])
         ViewText(data_list_string_output).show()
 
     def highlight_command(self, command):
         if self.selection_mode:
-            return "({})\t".format(command)
+            return "({})".format(command)
         else:
-            return "{}\t".format(command)
+            return "{}".format(command)

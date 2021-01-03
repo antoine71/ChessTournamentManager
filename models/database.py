@@ -9,11 +9,18 @@ from models.player import Player
 class PlayerDatabaseConverter:
     """This class converts Player objects to json and vice versa"""
 
-    def __init__(self, db=TinyDB('players_db.json')):
+    def __init__(self, db=TinyDB('database/db_player.json')):
         self.db = db
 
     def save_player(self, player):
-        self.db.insert(player.__dict__)
+        self.db.insert(
+            {
+                "last_name": player.last_name,
+                "first_name": player.first_name,
+                "date_of_birth": str(player.date_of_birth),
+                "ranking": player.ranking
+            }
+        )
 
     def load_database(self):
         return [Player(**item) for item in self.db]
@@ -21,13 +28,13 @@ class PlayerDatabaseConverter:
     def delete_player(self, player):
         self.db.remove((Query().last_name == player.last_name)
                        & (Query().first_name == player.first_name)
-                       & (Query().date_of_birth == player.date_of_birth))
+                       & (Query().date_of_birth == str(player.date_of_birth)))
 
 
 class TournamentDatabaseConverter:
     """This class converts Tournament objects to json and vice versa"""
 
-    def __init__(self, db=TinyDB('db_tournament.json')):
+    def __init__(self, db=TinyDB('database/db_tournament.json')):
         self.db = db
 
     def save_tournament(self, tournament):
@@ -36,8 +43,8 @@ class TournamentDatabaseConverter:
             {
                 'name': tournament.name,
                 'description': tournament.description,
-                'start_date': tournament.start_date,
-                'end_date': tournament.end_date,
+                'start_date': str(tournament.start_date),
+                'end_date': str(tournament.end_date),
                 'number_of_rounds': tournament.number_of_rounds,
                 'time_control': tournament.time_control,
                 'players':
@@ -45,7 +52,7 @@ class TournamentDatabaseConverter:
                         {
                             'last_name': player.last_name,
                             'first_name': player.first_name,
-                            'date_of_birth': player.date_of_birth,
+                            'date_of_birth': str(player.date_of_birth),
                             'ranking': player.ranking
                         }
                         for player in tournament.players
@@ -61,14 +68,14 @@ class TournamentDatabaseConverter:
                                             {
                                                 'last_name': game.pair[0].last_name,
                                                 'first_name': game.pair[0].first_name,
-                                                'date_of_birth': game.pair[0].date_of_birth,
+                                                'date_of_birth': str(game.pair[0].date_of_birth),
                                                 'ranking': game.pair[0].ranking
                                             },
                                         'player2':
                                             {
                                                 'last_name': game.pair[1].last_name,
                                                 'first_name': game.pair[1].first_name,
-                                                'date_of_birth': game.pair[1].date_of_birth,
+                                                'date_of_birth': str(game.pair[1].date_of_birth),
                                                 'ranking': game.pair[1].ranking
                                             },
                                         'result': game.result
@@ -80,6 +87,14 @@ class TournamentDatabaseConverter:
                     ]
             },
             Query().name == tournament.name
+        )
+
+    def delete_tournament(self, tournament):
+        self.db.remove(
+            (Query().name == tournament.name) &
+            (Query().start_date == str(tournament.start_date)) &
+            (Query().end_date == str(tournament.end_date)) &
+            (Query().time_control == tournament.time_control)
         )
 
     def load_database(self):

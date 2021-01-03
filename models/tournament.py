@@ -1,5 +1,8 @@
 """This module contains the models related to the tournaments"""
 
+import utils.utils as utils
+from models.date import Date
+
 
 class Tournament:
     """This class describes a tournament"""
@@ -9,9 +12,12 @@ class Tournament:
     def __init__(self, name, description, start_date, end_date, number_of_rounds, time_control):
         self.name = name
         self.description = description
-        self.start_date = start_date
-        self.end_date = end_date
-        self.number_of_rounds = int(number_of_rounds)
+        self.start_date = Date(start_date)
+        self.end_date = Date(end_date)
+        if number_of_rounds == "":
+            self.number_of_rounds = 4
+        else:
+            self.number_of_rounds = int(number_of_rounds)
         self.players = []
         self.rounds = []
         self.time_control = time_control
@@ -51,6 +57,31 @@ class Tournament:
         return list.__repr__(list(self.__dict__.values()))
 
 
+class TournamentDataValidator:
+    """This class contains methods used to validate parameters before creating a Tournament object"""
+
+    def is_name_ok(self, name):
+        return utils.check_string_length(name, 50)
+
+    def is_description_ok(self, description):
+        return utils.check_string_length(description, 100)
+
+    def is_start_date_ok(self, start_date):
+        return utils.is_date_format_dd_mm_yyyy(start_date)
+
+    def is_end_date_ok(self, end_date):
+        return utils.is_date_format_dd_mm_yyyy(end_date)
+
+    def is_number_of_rounds_ok(self, number_of_rounds):
+        if number_of_rounds == "":
+            return True
+        else:
+            return utils.is_positive_integer(number_of_rounds)
+
+    def is_time_control_ok(self, time_control):
+        return time_control == "blitz" or time_control == "bullet" or time_control == "coup rapide"
+
+
 class Round:
     """This class describes a round"""
 
@@ -73,8 +104,9 @@ class Round:
         return ScoreTable.aggregate(*[game.score_table for game in self.games])
 
     def draw_games(self):
-        self.games = [Game(self.tournament.players[i], self.tournament.players[i + int(Tournament.NUMBER_OF_PLAYERS / 2)])
-                 for i in range(int(Tournament.NUMBER_OF_PLAYERS / 2))]
+        self.games = [Game(self.tournament.players[i],
+                           self.tournament.players[i + int(Tournament.NUMBER_OF_PLAYERS / 2)])
+                      for i in range(int(Tournament.NUMBER_OF_PLAYERS / 2))]
 
     def __repr__(self):
         return "\n".join([str(game) for game in self.games])
@@ -154,5 +186,3 @@ class GameScoreTable(ScoreTable):
     def update_score_draw(self, player1, player2):
         self.score_table[player1] += 0.5
         self.score_table[player2] += 0.5
-
-

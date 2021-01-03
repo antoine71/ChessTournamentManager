@@ -1,6 +1,6 @@
 """This module contains the controllers related to the creation of a new player"""
 
-from models.player import Player
+from models.player import Player, PlayerDataValidator
 
 from controllers.database_management import ControllerSavePlayer
 
@@ -16,13 +16,23 @@ class ControllerNewPlayer:
         self.database = database
 
     def run(self):
-        player = Player(*[ViewPrompt(variable).show() for variable in
-                          [
-                              'Nom : ',
-                              'Prénom : ',
-                              'Date de naissance : ',
-                              'classement : '
-                          ]])
+
+        player_data = []
+        validator = PlayerDataValidator()
+        prompt = (
+            ('Nom (max. 50 caractères): ', validator.is_last_name_ok),
+            ('Prénom (max. 50 caractères): ', validator.is_first_name_ok),
+            ('Date de naissance (jj/mm/aaaa): ', validator.is_date_of_birth_ok),
+            ('classement (entier positif): ', validator.is_ranking_ok)
+        )
+        for message, check_function in prompt:
+            user_input = ViewPrompt(message).show()
+            while not check_function(user_input):
+                ViewText("Erreur de saisie, veuillez recommencer.").show()
+                user_input = ViewPrompt(message).show()
+            player_data.append(user_input)
+        player = Player(*player_data)
+
         if player not in self.database:
             self.database.append(player)
             ViewText("Création du joueur terminée avec succès.").show()

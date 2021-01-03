@@ -4,6 +4,8 @@ from operator import itemgetter
 
 from views.general import ViewText
 
+from utils.utils import resize_string
+
 
 class ViewTournamentDetails:
     """This view displays the attributes and values of a Tournament object"""
@@ -40,8 +42,8 @@ class ViewScoreTable:
         else:
             sorted_score_table = sorted(self.score_table.score_table.items(), key=itemgetter(1), reverse=True)
             string_output = "\n".join([
-                "\t{}: {}".format(player, score)
-                for player, score in sorted_score_table
+                "{}\t{}: {}".format(i + 1, player, score)
+                for (i, (player, score)) in enumerate(sorted_score_table)
             ])
         ViewText(string_output).show()
 
@@ -65,28 +67,39 @@ class ViewTournamentResult:
 class ViewRoundResult:
     """This view displays the results of each game of a round on the screen"""
 
-    def __init__(self, round_):
+    def __init__(self, round_, mode_view_results=True):
         self.round_ = round_
+        self.mode_view_results = mode_view_results
 
     def show(self):
         ViewText("\t{} - {}".format(self.round_.name, self.round_.status)).show()
         if not self.round_.games:
             ViewText("\t\tPas disponible").show()
         else:
-            for game in self.round_.games:
-                ViewGameResult(game).show()
+            for i, game in enumerate(self.round_.games):
+                ViewGameResult(i + 1, game, mode_view_results=self.mode_view_results).show()
 
 
 class ViewGameResult:
     """This view displays the results a game on the screen"""
 
-    def __init__(self, game):
+    def __init__(self, game_number, game, mode_view_results=True):
+        self.game_number = game_number
         self.game = game
+        self.mode_view_results = mode_view_results
 
     def show(self):
         match_result_string_output = "\t".join([
-            "\t\t{}: {}".format(player, score)
+            resize_string("{}: {}".format(player, score), 30)
             for player, score in self.game.score_table.score_table.items()
         ])
-        string_output = ' - '.join([self.game.status, match_result_string_output])
+        game_number_display = " {} ".format(self.game_number) if self.mode_view_results \
+            else "({})".format(self.game_number)
+        string_output = ''.join(
+            [
+                resize_string(game_number_display, 5),
+                resize_string(self.game.status + ":", 22),
+                match_result_string_output
+            ]
+        )
         ViewText(string_output).show()
