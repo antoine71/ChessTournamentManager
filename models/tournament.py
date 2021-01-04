@@ -9,9 +9,10 @@ class Tournament:
 
     NUMBER_OF_PLAYERS = 4
 
-    def __init__(self, name, description, start_date, end_date, number_of_rounds, time_control):
+    def __init__(self, name, description, place, start_date, end_date, number_of_rounds, time_control):
         self.name = name
         self.description = description
+        self.place = place
         self.start_date = Date(start_date)
         self.end_date = Date(end_date)
         if number_of_rounds == "":
@@ -65,6 +66,9 @@ class TournamentDataValidator:
 
     def is_description_ok(self, description):
         return utils.check_string_length(description, 100)
+
+    def is_place_ok(self, place):
+        return utils.check_string_length(place, 50)
 
     def is_start_date_ok(self, start_date):
         return utils.is_date_format_dd_mm_yyyy(start_date)

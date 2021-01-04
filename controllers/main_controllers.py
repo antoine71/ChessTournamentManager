@@ -69,12 +69,21 @@ class ControllerMainMenu:
             "\t(1) Ajouter un joueur\n"
             "\t(2) Ajouter un Tournoi\n"
             "\t(3) Voir les joueurs\n"
-            "\t(4) Voir les tournois",
+            "\t(4) Voir les tournois\n"
+            "\t(q) Quitter le programme",
             {
-                '1': ControllerNewPlayer(self.player_database),
-                '2': ControllerNewTournament(self.tournament_database, self.player_database),
-                '3': ControllerPlayerDatabase(self.player_database),
-                '4': ControllerTournamentDatabase(self.tournament_database)
+                "1": ControllerNewPlayer(self.player_database),
+                "2": ControllerNewTournament(self.tournament_database, self.player_database),
+                "3": ControllerPlayerDatabase(self.player_database),
+                "4": ControllerTournamentDatabase(self.tournament_database),
+                "q": ControllerQuitProgram()
+
             },
             return_to_menu=False
         ).run()
+
+
+class ControllerQuitProgram:
+
+    def run(self):
+        quit()

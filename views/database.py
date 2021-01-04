@@ -27,14 +27,18 @@ class ViewDatabase:
 
     def show(self):
         ViewText(self.title).show()
-        self.database.sort(key=attrgetter(self.sort_by_attribute), reverse=self.sort_order)
-        data_list_string_output = "\n".join(
-            [
-                resize_string(self.highlight_command(i + 1), 6)
-                + "".join([resize_string(str(data.__getattribute__(attribute)), 25)
-                           for attribute in self.attributes])
-                for i, data in enumerate(self.database)
-            ])
+        if not self.database:
+            data_list_string_output = "La base de données est vide."
+        else:
+            self.database.sort(key=attrgetter(self.sort_by_attribute), reverse=self.sort_order)
+            data_list_string_output = "\n".join(
+                [
+                    resize_string(self.highlight_command(i + 1), 6)
+                    + "".join([resize_string(str(data.__getattribute__(attribute)), 25)
+                               for attribute in self.attributes])
+                    for i, data in enumerate(self.database)
+                ])
+
         ViewText(data_list_string_output).show()
 
     def highlight_command(self, command):
@@ -42,3 +46,19 @@ class ViewDatabase:
             return "({})".format(command)
         else:
             return "{}".format(command)
+
+
+class ViewDatabaseDetails:
+    """This view displays the attributes and values of a Tournament object"""
+
+    def __init__(self, title, database_object, fields, object_attributes):
+        self.title = title
+        self.database_object = database_object
+        self.fields = fields
+        self.object_attributes = object_attributes
+
+    def show(self):
+        ViewText(self.title).show()
+        string_output = "\n".join(["\t{} : {}".format(field, self.database_object.__getattribute__(attribute))
+                                   for field, attribute in tuple(zip(self.fields, self.object_attributes))])
+        ViewText(string_output).show()

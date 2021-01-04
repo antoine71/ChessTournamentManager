@@ -7,27 +7,6 @@ from views.general import ViewText
 from utils.utils import resize_string
 
 
-class ViewTournamentDetails:
-    """This view displays the attributes and values of a Tournament object"""
-
-    def __init__(self, title, tournament):
-        self.title = title
-        self.tournament = tournament
-
-    def show(self):
-        ViewText(self.title).show()
-        string_output = "\n".join([
-            "\tNom : {}".format(self.tournament.name),
-            "\tDescription : {}".format(self.tournament.description),
-            "\tDate de début : {}".format(self.tournament.start_date),
-            "\tDate de fin : {}".format(self.tournament.end_date),
-            "\tNombre de rounds : {}".format(self.tournament.number_of_rounds),
-            "\tContrôle du temps : {}".format(self.tournament.time_control),
-            "\tStatus : {}".format(self.tournament.status),
-        ])
-        ViewText(string_output).show()
-
-
 class ViewScoreTable:
     """This view displays a ScoreTable object on the screen"""
 

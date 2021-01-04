@@ -13,13 +13,16 @@ class PlayerDatabaseConverter:
         self.db = db
 
     def save_player(self, player):
-        self.db.insert(
+        self.db.upsert(
             {
                 "last_name": player.last_name,
                 "first_name": player.first_name,
                 "date_of_birth": str(player.date_of_birth),
                 "ranking": player.ranking
-            }
+            },
+            (Query().last_name == player.last_name)
+            & (Query().first_name == player.first_name)
+            & (Query().date_of_birth == str(player.date_of_birth))
         )
 
     def load_database(self):
@@ -43,6 +46,7 @@ class TournamentDatabaseConverter:
             {
                 'name': tournament.name,
                 'description': tournament.description,
+                'place': tournament.place,
                 'start_date': str(tournament.start_date),
                 'end_date': str(tournament.end_date),
                 'number_of_rounds': tournament.number_of_rounds,
@@ -104,6 +108,7 @@ class TournamentDatabaseConverter:
         tournament = Tournament(
             tournament_json['name'],
             tournament_json['description'],
+            tournament_json['place'],
             tournament_json['start_date'],
             tournament_json['end_date'],
             tournament_json['number_of_rounds'],

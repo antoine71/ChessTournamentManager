@@ -5,8 +5,8 @@ from controllers.database_management import ControllerDeleteTournament
 from controllers.play_tournament import ControllerPlayTournament
 from controllers.database_management import ControllerDeleteTournament
 
-from views.database import ViewDatabase
-from views.tournament import ViewTournamentDetails, ViewScoreTable, ViewTournamentResult
+from views.database import ViewDatabase, ViewDatabaseDetails
+from views.tournament import ViewScoreTable, ViewTournamentResult
 
 
 class ControllerTournamentDatabase:
@@ -28,14 +28,13 @@ class ControllerTournamentDatabase:
             for i in range(len(self.tournament_database))
         }
         commands.update({
-                str(i + 1): ControllerTournamentReport(self.tournament_database[i])
+                str(i + 1): ControllerTournamentReport(self.tournament_database[i], self.tournament_database)
                 for i in range(len(self.tournament_database))
             }
         )
 
         mc.ControllerCommandInterpreter(
-            "(X) Saississez le numéro d'un tournoi pour afficher le rapport du tournoi\n"
-            "(supprimer X) Supprimer le tournoi",
+            "(X) Afficher le rapport du tournoi numéro X",
             commands
         ).run()
 
@@ -43,11 +42,19 @@ class ControllerTournamentDatabase:
 class ControllerTournamentReport:
     """This class manages the display of the tournament report"""
 
-    def __init__(self, tournament):
+    def __init__(self, tournament, tournament_database):
         self.tournament = tournament
+        self.tournament_database = tournament_database
 
     def run(self):
-        ViewTournamentDetails("Détails du Tournoi", self.tournament).show()
+        ViewDatabaseDetails(
+            "Détails du Tournoi",
+            self.tournament,
+            ["Nom", "Description", "Lieu", "Date de début", "Date de fin", "Nombre de rounds",
+             "Contrôle du temps", "Status"],
+            ["name", "description", "place", "start_date", "end_date", "number_of_rounds",
+             "time_control", "status"]
+        ).show()
         ViewDatabase(
             self.tournament.players,
             "Liste des joueurs engagés",
@@ -60,9 +67,12 @@ class ControllerTournamentReport:
 
         if self.tournament.status != "terminé":
             commands_message = "(j) Jouer / reprendre le tournoi"
-            commands_list = {"j": ControllerPlayTournament(self.tournament)}
+            commands_list = {"j": ControllerPlayTournament(self.tournament, self.tournament_database)}
         else:
             commands_message = ""
             commands_list = {}
 
-        mc.ControllerCommandInterpreter(commands_message, commands_list, ).run()
+        commands_message += "\n(supprimer) Supprimer le tournoi de la base de donnée"
+        commands_list['supprimer'] = ControllerDeleteTournament(self.tournament, self.tournament_database)
+
+        mc.ControllerCommandInterpreter(commands_message, commands_list).run()

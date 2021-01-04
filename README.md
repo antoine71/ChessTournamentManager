@@ -1,16 +1,36 @@
-Program Chess Tournament Manager Openclassrooms Parcours développement Python Projet 4
+# CHESS TOURNAMENT MANAGER 
+###Openclassrooms - Parcours développement Python Projet 4
 
+##Content
 This program is currently under development.
 
-status on 31/12/2020
+##Description
+This program is a manager for chess tournaments using the Swiss rounds system. 
 
-The program has been fully rebooted and rebuild from scratch.
+Create your players and your tournaments and the program will automatically draw the games for each round.
 
-The program is functional but code required a lot of clean-up.
+Enter the results, and the program will automatically calculate the rankings of the tournament.
 
-To run the program:
+The tournaments and players are saved in a local database. Each modification is automatically saved to the database. 
+You can quit the program anytime and restart a tournament where you have left it. 
 
-Install virtual environment
+##How to Clone
 
-run python script.py
+Just download the repository to your computer in a location of your choice.
 
+##Installation
+To install and run this project, you must first 
+
+1. Install python3 to your computer: [python.org](https://www.python.org/)
+2. Navigate to your local repository folder
+3. Run the following commands
+```bash
+python -m venv env                  #create a virtual environment
+source env/bin/activate             #activate the virtual environment
+pip install -r requirements.txt     #install the external modules
+python main.py                      #run the program
+```
+
+##preview
+
+![](/preview.jpg)

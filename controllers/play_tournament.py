@@ -13,8 +13,9 @@ class ControllerPlayTournament:
     It will allow the user to draw the games for each round and enter the results.
     After each update, the tournament TinyDB json file is updated."""
 
-    def __init__(self, tournament):
+    def __init__(self, tournament, tournament_database):
         self.tournament = tournament
+        self.tournament_database = tournament_database
 
     def run(self):
         self.tournament.play_tournament()
@@ -45,7 +46,7 @@ class ControllerPlayTournament:
         ViewText("Tournoi Terminé").show()
         mc.ControllerCommandInterpreter(
             "(r) Afficher le rapport de tournoi",
-            {"r": ctd.ControllerTournamentReport(self.tournament)}
+            {"r": ctd.ControllerTournamentReport(self.tournament, self.tournament_database)}
         ).run()
 
 

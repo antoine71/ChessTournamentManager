@@ -26,6 +26,7 @@ class ControllerNewTournament:
         prompt = (
             ('Nom (max. 50 caractères): ', validator.is_name_ok),
             ('Description (max. 50 caractères): ', validator.is_description_ok),
+            ('Lieu (max. 50 caractères): ', validator.is_place_ok),
             ('Date de début (jj/mm/aaaa): ', validator.is_start_date_ok),
             ('Date de fin (jj/mm/aaaa): ', validator.is_end_date_ok),
             ('Nombre de rounds:  (entier positif, par défaut: 4): ', validator.is_number_of_rounds_ok),
@@ -60,14 +61,15 @@ class ControllerChoosePlayer:
             self.player_database,
             "Sélection des joueurs:",
             "last_name", "first_name", "date_of_birth", "ranking",
-            sort_by_attribute="last_name"
+            sort_by_attribute="last_name",
+            sort_order=False
         ).show()
         tournament_players = []
         while len(tournament_players) < Tournament.NUMBER_OF_PLAYERS:
             mc.ControllerCommandInterpreter(
                 "(X) Choisir un joueur par son numéro",
                 {
-                    str(i): ControllerAddPlayer(tournament_players, self.player_database[i])
+                    str(i + 1): ControllerAddPlayer(tournament_players, self.player_database[i])
                     for i in range(len(self.player_database))
                 }
             ).run()

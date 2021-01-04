@@ -2,7 +2,7 @@
 
 import utils.utils as utils
 
-from models.date import  Date
+from models.date import Date
 
 
 class Player:
@@ -13,6 +13,9 @@ class Player:
         self.first_name = first_name
         self.date_of_birth = Date(date_of_birth)
         self.ranking = int(ranking)
+
+    def update_ranking(self, new_ranking):
+        self.ranking = int(new_ranking)
 
     def __hash__(self):
         return hash((self.last_name, self.first_name, self.date_of_birth))
