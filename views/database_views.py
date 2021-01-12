@@ -17,10 +17,12 @@ class ViewDatabase:
         can be used as a command
         sort_by_attribute (string): the attribute that shall be used to sort the table"""
 
-    def __init__(self, database, title, *attributes, selection_mode=True, sort_by_attribute="name", sort_order=True):
+    def __init__(self, database, title, *attributes, headers=[], selection_mode=True, sort_by_attribute="name",
+                 sort_order=True):
         self.database = database
         self.title = title
         self.attributes = attributes
+        self.headers = headers
         self.selection_mode = selection_mode
         self.sort_by_attribute = sort_by_attribute
         self.sort_order = sort_order
@@ -31,15 +33,21 @@ class ViewDatabase:
             data_list_string_output = "La base de données est vide."
         else:
             self.database.sort(key=attrgetter(self.sort_by_attribute), reverse=self.sort_order)
+            if self.headers:
+                headers_string_output = " " * 6 \
+                                        + "".join([resize_string(header, 25).upper() for header in self.headers])\
+                                        + "\n"
+            else:
+                headers_string_output = ""
             data_list_string_output = "\n".join(
                 [
                     resize_string(self.highlight_command(i + 1), 6)
-                    + "".join([resize_string(str(data.__getattribute__(attribute)), 25)
+                    + "".join([resize_string(str(getattr(data, attribute)), 25)
                                for attribute in self.attributes])
                     for i, data in enumerate(self.database)
                 ])
 
-        ViewText(data_list_string_output).show()
+        ViewText(headers_string_output + data_list_string_output).show()
 
     def highlight_command(self, command):
         if self.selection_mode:

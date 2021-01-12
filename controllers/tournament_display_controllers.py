@@ -3,6 +3,7 @@
 import controllers.main_controllers as mc
 from controllers.play_tournament_controllers import ControllerPlayTournament
 from controllers.database_management_controllers import ControllerDeleteTournament
+from controllers.player_display_controllers import ControllerPlayerDatabase
 
 from views.database_views import ViewDatabase, ViewDatabaseDetails
 from views.tournament_views import ViewScoreTable, ViewTournamentResult
@@ -18,6 +19,12 @@ class ControllerTournamentDatabase:
         view = ViewDatabase(self.tournament_database,
                             "Base de données des Tournois",
                             'name', 'start_date', 'end_date', 'status',
+                            headers=[
+                                "Nom",
+                                "Date de début",
+                                "Date de fin",
+                                "Status"
+                            ],
                             sort_by_attribute="start_date",
                             sort_order=True)
         view.show()
@@ -55,13 +62,6 @@ class ControllerTournamentReport:
             ["name", "description", "place", "start_date", "end_date", "number_of_rounds",
              "time_control", "status"]
         ).show()
-        ViewDatabase(
-            self.tournament.players,
-            "Liste des joueurs engagés",
-            'last_name', 'first_name', 'date_of_birth', 'ranking',
-            selection_mode=False,
-            sort_by_attribute="last_name"
-        ).show()
         ViewScoreTable("Classement:", self.tournament.score_table).show()
         ViewTournamentResult("Résultats du Tournoi:", self.tournament).show()
 
@@ -71,6 +71,10 @@ class ControllerTournamentReport:
         else:
             commands_message = ""
             commands_list = {}
+
+        commands_message += "\n(p) Afficher la liste des participants"
+        commands_list['p'] = ControllerPlayerDatabase(self.tournament.players,
+                                                      title=f"{self.tournament.name} - Liste des participants")
 
         commands_message += "\n(supprimer) Supprimer le tournoi de la base de donnée"
         commands_list['supprimer'] = ControllerDeleteTournament(self.tournament, self.tournament_database)

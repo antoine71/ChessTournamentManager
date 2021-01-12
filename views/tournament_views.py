@@ -53,7 +53,7 @@ class ViewRoundResult:
         self.mode_view_results = mode_view_results
 
     def show(self):
-        ViewText("\t{} - {}".format(self.round_.name, self.round_.status)).show()
+        ViewText("\t{} - {}".format(self.round_.name, self.round_.status).upper()).show()
         if not self.round_.games:
             ViewText("\t\tPas disponible").show()
         else:

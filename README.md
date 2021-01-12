@@ -25,5 +25,12 @@ pip install -r requirements.txt     #install the external modules
 python3 main.py                      #run the program
 ```
 
+## Create a flake8 report
+Run the following command line:
+```bash
+flake8 --exclude .git,__pycache__,venv/ --max-line-length=119 --format=html --htmldir=flake8-rapport
+```
+A html report will be created in the directory ./flake8_report/
+
 ## Preview
 ![](/preview.jpg)

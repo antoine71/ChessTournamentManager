@@ -12,15 +12,24 @@ from views.general_views import ViewText, ViewPrompt
 class ControllerPlayerDatabase:
     """This class manages the display of the list of players"""
 
-    def __init__(self, player_database, sort_by_attribute="last_name", sort_order=False):
+    def __init__(self, player_database, sort_by_attribute="last_name", sort_order=False,
+                 title="Base de données des Joueurs"):
         self.player_database = player_database
         self.sort_by_attribute = sort_by_attribute
         self.sort_order = sort_order
+        self.title = title
 
     def run(self):
         view = ViewDatabase(self.player_database,
-                            "Base de données des Joueurs",
+                            self.title,
                             'last_name', 'first_name', 'date_of_birth', 'sex', 'ranking',
+                            headers=[
+                                "Nom de famille",
+                                "Prénom",
+                                "Date de naissance",
+                                "Sexe",
+                                "Classement"
+                            ],
                             selection_mode=True,
                             sort_by_attribute=self.sort_by_attribute,
                             sort_order=self.sort_order)
@@ -32,8 +41,10 @@ class ControllerPlayerDatabase:
         }
         commands.update(
             {
-                'n': ControllerPlayerDatabase(self.player_database, sort_by_attribute="last_name"),
-                'c': ControllerPlayerDatabase(self.player_database, sort_by_attribute="ranking", sort_order=True)
+                'n': ControllerPlayerDatabase(self.player_database, sort_by_attribute="last_name",
+                                              title=self.title),
+                'c': ControllerPlayerDatabase(self.player_database, sort_by_attribute="ranking", sort_order=True,
+                                              title=self.title)
             }
         )
 
