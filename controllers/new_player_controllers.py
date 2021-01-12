@@ -2,9 +2,9 @@
 
 from models.player import Player, PlayerDataValidator
 
-from controllers.database_management import ControllerSavePlayer
+from controllers.database_management_controllers import ControllerSavePlayer
 
-from views.general import ViewPrompt, ViewText
+from views.general_views import ViewPrompt, ViewText
 
 
 class ControllerNewPlayer:
@@ -23,6 +23,7 @@ class ControllerNewPlayer:
             ('Nom (max. 50 caractères): ', validator.is_last_name_ok),
             ('Prénom (max. 50 caractères): ', validator.is_first_name_ok),
             ('Date de naissance (jj/mm/aaaa): ', validator.is_date_of_birth_ok),
+            ('Sexe (m/f): ', validator.is_sex_ok),
             ('classement (entier positif): ', validator.is_ranking_ok)
         )
         for message, check_function in prompt:
@@ -39,4 +40,3 @@ class ControllerNewPlayer:
             ControllerSavePlayer(player).run()
         else:
             ViewText("Erreur: le joueur existe déjà (même nom, prénom et date de naissance).").show()
-

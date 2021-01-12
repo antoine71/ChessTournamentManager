@@ -2,9 +2,11 @@
 
 from operator import itemgetter
 
-from views.general import ViewText
+from views.general_views import ViewText
 
 from utils.utils import resize_string
+
+from datetime import datetime
 
 
 class ViewScoreTable:
@@ -55,6 +57,11 @@ class ViewRoundResult:
         if not self.round_.games:
             ViewText("\t\tPas disponible").show()
         else:
+            if self.round_.start_time != datetime(1970, 1, 1):
+                print("Date et heure de début:", self.round_.start_time.strftime("%d/%m/%y %H:%M"))
+            if self.round_.end_time != datetime(1970, 1, 1):
+                print("Date et heure de fin:", self.round_.end_time.strftime("%d/%m/%y %H:%M"))
+            print('')
             for i, game in enumerate(self.round_.games):
                 ViewGameResult(i + 1, game, mode_view_results=self.mode_view_results).show()
 

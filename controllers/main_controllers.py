@@ -1,13 +1,13 @@
 """This module contain the main controllers of the program"""
 
-from controllers.new_player import ControllerNewPlayer
-from controllers.new_tournament import ControllerNewTournament
-from controllers.player_display import ControllerPlayerDatabase
-from controllers.tournament_display import ControllerTournamentDatabase
+from controllers.new_player_controllers import ControllerNewPlayer
+from controllers.new_tournament_controllers import ControllerNewTournament
+from controllers.player_display_controllers import ControllerPlayerDatabase
+from controllers.tournament_display_controllers import ControllerTournamentDatabase
 
 from models.database import TournamentDatabaseConverter, PlayerDatabaseConverter
 
-from views.general import ViewText, ViewPrompt
+from views.general_views import ViewText, ViewPrompt
 
 
 class ControllerMain:
@@ -40,7 +40,8 @@ class ControllerCommandInterpreter:
         self.commands = commands
         if return_to_menu:
             self.commands['m'] = ControllerMain()
-            self.message = "(m) Retour au menu principal" if not message else message + "\n(m) Retour au menu principal"
+            self.message = "(m) Retour au menu principal" if not message else message + "\n" \
+                                                                                        "(m) Retour au menu principal"
         else:
             self.message = message
 

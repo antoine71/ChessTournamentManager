@@ -5,6 +5,8 @@ from tinydb import TinyDB, Query
 from models.tournament import Tournament, Round, Game
 from models.player import Player
 
+from datetime import datetime
+
 
 class PlayerDatabaseConverter:
     """This class converts Player objects to json and vice versa"""
@@ -18,6 +20,7 @@ class PlayerDatabaseConverter:
                 "last_name": player.last_name,
                 "first_name": player.first_name,
                 "date_of_birth": str(player.date_of_birth),
+                "sex": player.sex,
                 "ranking": player.ranking
             },
             (Query().last_name == player.last_name)
@@ -57,6 +60,7 @@ class TournamentDatabaseConverter:
                             'last_name': player.last_name,
                             'first_name': player.first_name,
                             'date_of_birth': str(player.date_of_birth),
+                            'sex': player.sex,
                             'ranking': player.ranking
                         }
                         for player in tournament.players
@@ -65,6 +69,23 @@ class TournamentDatabaseConverter:
                     [
                         {
                             'name': round_.name,
+                            'start':
+                                {
+                                    'y': round_.start_time.year,
+                                    'mo': round_.start_time.month,
+                                    'd': round_.start_time.day,
+                                    'h': round_.start_time.hour,
+                                    'mi': round_.start_time.minute
+                                },
+                            'end':
+                                {
+
+                                    'y': round_.end_time.year,
+                                    'mo': round_.end_time.month,
+                                    'd': round_.end_time.day,
+                                    'h': round_.end_time.hour,
+                                    'mi': round_.end_time.minute
+                                },
                             'games':
                                 [
                                     {
@@ -73,6 +94,7 @@ class TournamentDatabaseConverter:
                                                 'last_name': game.pair[0].last_name,
                                                 'first_name': game.pair[0].first_name,
                                                 'date_of_birth': str(game.pair[0].date_of_birth),
+                                                'sex': game.pair[0].sex,
                                                 'ranking': game.pair[0].ranking
                                             },
                                         'player2':
@@ -80,12 +102,14 @@ class TournamentDatabaseConverter:
                                                 'last_name': game.pair[1].last_name,
                                                 'first_name': game.pair[1].first_name,
                                                 'date_of_birth': str(game.pair[1].date_of_birth),
+                                                'sex': game.pair[1].sex,
                                                 'ranking': game.pair[1].ranking
                                             },
                                         'result': game.result
                                     }
                                     for game in round_.games
-                                ]
+                                ],
+                            'end_confirmation': round_.end_confirmation
                         }
                         for round_ in tournament.rounds
                     ]
@@ -120,6 +144,21 @@ class TournamentDatabaseConverter:
 
         for round_ in tournament_json['rounds']:
             new_round = Round(tournament)
+            new_round.start_time = datetime(
+                round_['start']['y'],
+                round_['start']['mo'],
+                round_['start']['d'],
+                round_['start']['h'],
+                round_['start']['mi'],
+            )
+            new_round.end_time = datetime(
+                round_['end']['y'],
+                round_['end']['mo'],
+                round_['end']['d'],
+                round_['end']['h'],
+                round_['end']['mi'],
+            )
+            new_round.end_confirmation = round_['end_confirmation']
             for game_data in round_['games']:
                 new_game = Game(Player(**game_data['player1']), Player(**game_data['player2']))
                 new_game.update_result(game_data['result'])

@@ -13,7 +13,7 @@ def is_positive_integer(number):
     if isinstance(number, int):
         return number >= 0
     elif isinstance(number, float):
-        return float(number) % 1 == 0
+        return number % 1 == 0 and number >= 0
     elif isinstance(number, str):
         if number.isdigit():
             return int(number) >= 0 and float(number) % 1 == 0

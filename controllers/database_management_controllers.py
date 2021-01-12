@@ -2,7 +2,7 @@
 
 from models.database import PlayerDatabaseConverter, TournamentDatabaseConverter
 
-from views.general import ViewText
+from views.general_views import ViewText
 
 
 class ControllerSaveTournament:

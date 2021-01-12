@@ -1,12 +1,12 @@
 """This module groups the controllers related to the display of players"""
 
 import controllers.main_controllers as mc
-from controllers.database_management import ControllerDeletePlayer, ControllerSavePlayer
+from controllers.database_management_controllers import ControllerDeletePlayer, ControllerSavePlayer
 
 from models.player import PlayerDataValidator
 
-from views.database import ViewDatabase, ViewDatabaseDetails
-from views.general import ViewText, ViewPrompt
+from views.database_views import ViewDatabase, ViewDatabaseDetails
+from views.general_views import ViewText, ViewPrompt
 
 
 class ControllerPlayerDatabase:
@@ -20,7 +20,7 @@ class ControllerPlayerDatabase:
     def run(self):
         view = ViewDatabase(self.player_database,
                             "Base de données des Joueurs",
-                            'last_name', 'first_name', 'date_of_birth', 'ranking',
+                            'last_name', 'first_name', 'date_of_birth', 'sex', 'ranking',
                             selection_mode=True,
                             sort_by_attribute=self.sort_by_attribute,
                             sort_order=self.sort_order)
@@ -55,8 +55,8 @@ class ControllerPlayerReport:
         ViewDatabaseDetails(
             "Détails du Joueur",
             self.player,
-            ["Nom de Famille", "Prénom", "Date de naissance", "Classement"],
-            ["last_name", "first_name", "date_of_birth", "ranking"]
+            ["Nom de Famille", "Prénom", "Date de naissance", "Sexe", "Classement"],
+            ["last_name", "first_name", "date_of_birth", "sex", "ranking"]
         ).show()
 
         mc.ControllerCommandInterpreter(

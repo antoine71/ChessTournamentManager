@@ -18,5 +18,3 @@ class ViewPrompt(ViewText):
         user_command = input(self.data)
         print("")
         return user_command
-
-

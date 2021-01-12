@@ -1,12 +1,11 @@
 """This module groups the class related to the display of players"""
 
 import controllers.main_controllers as mc
-from controllers.database_management import ControllerDeleteTournament
-from controllers.play_tournament import ControllerPlayTournament
-from controllers.database_management import ControllerDeleteTournament
+from controllers.play_tournament_controllers import ControllerPlayTournament
+from controllers.database_management_controllers import ControllerDeleteTournament
 
-from views.database import ViewDatabase, ViewDatabaseDetails
-from views.tournament import ViewScoreTable, ViewTournamentResult
+from views.database_views import ViewDatabase, ViewDatabaseDetails
+from views.tournament_views import ViewScoreTable, ViewTournamentResult
 
 
 class ControllerTournamentDatabase:
@@ -24,7 +23,8 @@ class ControllerTournamentDatabase:
         view.show()
 
         commands = {
-            "supprimer " + str(i + 1): ControllerDeleteTournament(self.tournament_database[i], self.tournament_database)
+            "supprimer " + str(i + 1): ControllerDeleteTournament(self.tournament_database[i],
+                                                                  self.tournament_database)
             for i in range(len(self.tournament_database))
         }
         commands.update({

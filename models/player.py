@@ -8,10 +8,11 @@ from models.date import Date
 class Player:
     """This class describes a player"""
 
-    def __init__(self, last_name, first_name, date_of_birth, ranking):
+    def __init__(self, last_name, first_name, date_of_birth, sex, ranking):
         self.last_name = last_name
         self.first_name = first_name
         self.date_of_birth = Date(date_of_birth)
+        self.sex = sex
         self.ranking = int(ranking)
 
     def update_ranking(self, new_ranking):
@@ -40,7 +41,8 @@ class PlayerDataValidator:
     def is_date_of_birth_ok(self, date_of_birth):
         return utils.is_date_format_dd_mm_yyyy(date_of_birth)
 
+    def is_sex_ok(self, sex):
+        return sex == "m" or sex == "f"
+
     def is_ranking_ok(self, ranking):
         return utils.is_positive_integer(ranking)
-
-

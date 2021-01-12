@@ -1,14 +1,12 @@
 """This module contains the controllers related to the creation of a new tournament"""
 
 import controllers.main_controllers as mc
-from controllers.database_management import ControllerSaveTournament
+from controllers.database_management_controllers import ControllerSaveTournament
 
 from models.tournament import Tournament, TournamentDataValidator
 
-from views.general import ViewPrompt, ViewText
-from views.database import ViewDatabase
-
-import utils
+from views.general_views import ViewPrompt, ViewText
+from views.database_views import ViewDatabase
 
 
 class ControllerNewTournament:

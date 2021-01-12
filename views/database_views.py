@@ -1,6 +1,6 @@
 """This module groups the classes related to the display of lists of objects"""
 
-from views.general import ViewText
+from views.general_views import ViewText
 
 from operator import attrgetter
 

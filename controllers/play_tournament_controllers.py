@@ -1,11 +1,11 @@
 """This module contains the controllers related to the operation of a tournament"""
 
 import controllers.main_controllers as mc
-from controllers.database_management import ControllerSaveTournament
-import controllers.tournament_display as ctd
+from controllers.database_management_controllers import ControllerSaveTournament
+import controllers.tournament_display_controllers as ctd
 
-from views.general import ViewText
-from views.tournament import ViewRoundResult
+from views.general_views import ViewText
+from views.tournament_views import ViewRoundResult
 
 
 class ControllerPlayTournament:
@@ -31,17 +31,37 @@ class ControllerPlayTournament:
                             "(t) Procéder au tirage des matchs",
                             {"t": ControllerDrawGames(round_)}
                         ).run()
+                        round_.start()
                         ControllerSaveTournament(self.tournament).run()
                         continue
                     else:
-                        mc.ControllerCommandInterpreter(
-                            "(X) Entrer le résultat du match X",
-                            {
+                        if not round_.status == "matchs terminé, en attente de validation":
+                            commands = {
+                                    str(i + 1): ControllerEnterResults(round_.games[i])
+                                    for i in range(len(round_.games))
+                            }
+                            commands.update({
+                                    "s": ControllerSaveTournament(self.tournament)
+                            })
+                            mc.ControllerCommandInterpreter(
+                                "(X) Entrer le résultat du match X\n"
+                                "(s) Sauvegarder le tournoi",
+                                commands
+                            ).run()
+                        else:
+                            commands = {
                                 str(i + 1): ControllerEnterResults(round_.games[i])
                                 for i in range(len(round_.games))
                             }
-                        ).run()
-                        ControllerSaveTournament(self.tournament).run()
+                            commands.update({
+                                "s": ControllerEndRound(self.tournament, round_)
+                            })
+                            mc.ControllerCommandInterpreter(
+                                "(X) Entrer le résultat du match X\n"
+                                "(s) Sauvegarder le tournoi et passer au round suivant",
+                                commands
+                            ).run()
+                round_.end()
                 ViewRoundResult(round_).show()
         ViewText("Tournoi Terminé").show()
         mc.ControllerCommandInterpreter(
@@ -56,17 +76,14 @@ class ControllerEnterResults:
         self.game = game
 
     def run(self):
-        if self.game.status == "terminé":
-            ViewText("Le match est déja joué.").show()
-        else:
-            ViewText("{} VS {}".format(self.game.pair[0], self.game.pair[1])).show()
-            mc.ControllerCommandInterpreter(
-                "(1 / n / 2) Entrez le résultat\n",
-                {
-                    "1": ControllerUpdateResult(self.game, "1"),
-                    "n": ControllerUpdateResult(self.game, "n"),
-                    "2": ControllerUpdateResult(self.game, "2"),
-                }).run()
+        ViewText("{} VS {}".format(self.game.pair[0], self.game.pair[1])).show()
+        mc.ControllerCommandInterpreter(
+            "(1 / n / 2) Entrez le résultat\n",
+            {
+                "1": ControllerUpdateResult(self.game, "1"),
+                "n": ControllerUpdateResult(self.game, "n"),
+                "2": ControllerUpdateResult(self.game, "2"),
+            }).run()
 
 
 class ControllerUpdateResult:
@@ -88,3 +105,14 @@ class ControllerDrawGames:
 
     def run(self):
         self.round_.draw_games()
+
+
+class ControllerEndRound:
+
+    def __init__(self, tournament, round_):
+        self.tournament = tournament
+        self.round_ = round_
+
+    def run(self):
+        self.round_.end_confirmation = True
+        ControllerSaveTournament(self.tournament).run()

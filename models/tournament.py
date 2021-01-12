@@ -1,13 +1,16 @@
 """This module contains the models related to the tournaments"""
+import datetime
 
 import utils.utils as utils
-from models.date import Date
+from models.date import Date\
+
+from operator import attrgetter, itemgetter
 
 
 class Tournament:
     """This class describes a tournament"""
 
-    NUMBER_OF_PLAYERS = 4
+    NUMBER_OF_PLAYERS = 8
 
     def __init__(self, name, description, place, start_date, end_date, number_of_rounds, time_control):
         self.name = name
@@ -22,6 +25,11 @@ class Tournament:
         self.players = []
         self.rounds = []
         self.time_control = time_control
+        self.saved = False
+
+    @property
+    def games(self):
+        return [game for game in [round_.games for round_ in self.rounds]]
 
     @property
     def status(self):
@@ -93,13 +101,18 @@ class Round:
         self.tournament = tournament
         self.name = "round{}".format(len(self.tournament.rounds) + 1)
         self.games = []
+        self.start_time = datetime.datetime(1970, 1, 1)
+        self.end_time = datetime.datetime(1970, 1, 1)
+        self.end_confirmation = False
 
     @property
     def status(self):
         if not self.games:
             return "pas encore commencé"
-        elif [game.status for game in self.games] == ["terminé"] * len(self.games):
+        elif [game.status for game in self.games] == ["terminé"] * len(self.games) and self.end_confirmation:
             return "terminé"
+        elif [game.status for game in self.games] == ["terminé"] * len(self.games):
+            return "matchs terminé, en attente de validation"
         else:
             return "en cours"
 
@@ -108,9 +121,33 @@ class Round:
         return ScoreTable.aggregate(*[game.score_table for game in self.games])
 
     def draw_games(self):
-        self.games = [Game(self.tournament.players[i],
-                           self.tournament.players[i + int(Tournament.NUMBER_OF_PLAYERS / 2)])
-                      for i in range(int(Tournament.NUMBER_OF_PLAYERS / 2))]
+        upper_list, lower_list = self.sort_player_for_draw()
+        while upper_list:
+            i = 0
+            while Game(upper_list[0], lower_list[i]) in self.tournament.games:
+                i += 1
+            self.games.append(Game(upper_list.pop(0), lower_list.pop(i)))
+
+    def sort_player_for_draw(self):
+        players_list = self.tournament.players
+        players_list.sort(key=attrgetter("ranking"), reverse=True)
+
+        try:
+            players_list_scores = [(player, self.tournament.score_table[player]) for player in players_list]
+        except KeyError:
+            players_list_scores = [(player, 0) for player in players_list]
+
+        players_list_scores.sort(key=itemgetter(1), reverse=True)
+
+        upper_list = [players_list_scores[i][0] for i in range(int(len(players_list) / 2))]
+        lower_list = [players_list_scores[i][0] for i in range(int(len(players_list) / 2), len(players_list))]
+        return upper_list, lower_list
+
+    def start(self):
+        self.start_time = datetime.datetime.now()
+
+    def end(self):
+        self.end_time = datetime.datetime.now()
 
     def __repr__(self):
         return "\n".join([str(game) for game in self.games])
@@ -185,8 +222,8 @@ class GameScoreTable(ScoreTable):
     """This class describes the score for a single game"""
 
     def update_score_victory(self, player):
-        self.score_table[player] += 1
+        self.score_table[player] = 1
 
     def update_score_draw(self, player1, player2):
-        self.score_table[player1] += 0.5
-        self.score_table[player2] += 0.5
+        self.score_table[player1] = 0.5
+        self.score_table[player2] = 0.5
