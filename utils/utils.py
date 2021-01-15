@@ -1,3 +1,5 @@
+"""This module contains utilitary functions not related to specific objects"""
+
 import re
 
 

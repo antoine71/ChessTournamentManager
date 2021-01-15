@@ -11,11 +11,11 @@ from datetime import datetime
 class PlayerDatabaseConverter:
     """This class converts Player objects to json and vice versa"""
 
-    def __init__(self, db=TinyDB('database/db_player.json')):
-        self.db = db
+    def __init__(self, db=TinyDB('database/db.json'), table="players"):
+        self.players_table = db.table(table)
 
     def save_player(self, player):
-        self.db.upsert(
+        self.players_table.upsert(
             {
                 "last_name": player.last_name,
                 "first_name": player.first_name,
@@ -29,23 +29,23 @@ class PlayerDatabaseConverter:
         )
 
     def load_database(self):
-        return [Player(**item) for item in self.db]
+        return [Player(**item) for item in self.players_table]
 
     def delete_player(self, player):
-        self.db.remove((Query().last_name == player.last_name)
-                       & (Query().first_name == player.first_name)
-                       & (Query().date_of_birth == str(player.date_of_birth)))
+        self.players_table.remove((Query().last_name == player.last_name)
+                                  & (Query().first_name == player.first_name)
+                                  & (Query().date_of_birth == str(player.date_of_birth)))
 
 
 class TournamentDatabaseConverter:
     """This class converts Tournament objects to json and vice versa"""
 
-    def __init__(self, db=TinyDB('database/db_tournament.json')):
-        self.db = db
+    def __init__(self, db=TinyDB('database/db.json'), table="tournaments"):
+        self.tournaments_table = db.table(table)
 
     def save_tournament(self, tournament):
 
-        self.db.upsert(
+        self.tournaments_table.upsert(
             {
                 'name': tournament.name,
                 'description': tournament.description,
@@ -118,7 +118,7 @@ class TournamentDatabaseConverter:
         )
 
     def delete_tournament(self, tournament):
-        self.db.remove(
+        self.tournaments_table.remove(
             (Query().name == tournament.name) &
             (Query().start_date == str(tournament.start_date)) &
             (Query().end_date == str(tournament.end_date)) &
@@ -126,7 +126,7 @@ class TournamentDatabaseConverter:
         )
 
     def load_database(self):
-        return [self.load_tournament(tournament_json) for tournament_json in self.db]
+        return [self.load_tournament(tournament_json) for tournament_json in self.tournaments_table]
 
     def load_tournament(self, tournament_json):
         tournament = Tournament(

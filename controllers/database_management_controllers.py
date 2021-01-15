@@ -17,6 +17,7 @@ class ControllerSaveTournament:
 
 
 class ControllerDeleteTournament:
+    """This controller is called to delete a tournament from the database"""
 
     def __init__(self, tournament, tournament_database):
         self.tournament = tournament
@@ -40,6 +41,7 @@ class ControllerSavePlayer:
 
 
 class ControllerDeletePlayer:
+    """This controller is called to delete a player from the database"""
 
     def __init__(self, player, player_database):
         self.player = player

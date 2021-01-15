@@ -11,7 +11,7 @@ from views.general_views import ViewText, ViewPrompt
 
 
 class ControllerMain:
-    """The main controller is called
+    """The main controller is called by the main script.
     It will load the players and tournament databases, and instantiate them in Database objects
     It will then instantiate a ControllerMainMenu"""
 
@@ -85,6 +85,7 @@ class ControllerMainMenu:
 
 
 class ControllerQuitProgram:
+    """This controller is called to quit the program"""
 
     def run(self):
         quit()

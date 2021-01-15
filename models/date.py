@@ -1,4 +1,9 @@
+"""This module groups the classes related to the Date class"""
+
 class Date:
+    """Date is a custom class used to store the start and end dates of the Tournament objects, and the birth date of 
+    the Player objects.
+    Is implements comparison operators in order to be able to sort by date"""
 
     def __init__(self, date_dd_mm_yyyy):
         self.date_string = date_dd_mm_yyyy

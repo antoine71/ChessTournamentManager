@@ -4,7 +4,12 @@ __pycache__/
 
 # virtual environment
 venv/
+env/
 
 # pycharm
 .idea
+
+#vscode
+.vscode/
+workspace.code-workspace
 

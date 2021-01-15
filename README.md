@@ -2,7 +2,7 @@
 Openclassrooms - Parcours développement Python Projet 4
 
 ## Status
-This program is currently under development.
+This ready for evaluation.
 
 ## Description
 This program is a manager for chess tournaments using the Swiss rounds system.

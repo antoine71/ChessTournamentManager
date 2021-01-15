@@ -30,7 +30,8 @@ class ViewDatabase:
     def show(self):
         ViewText(self.title).show()
         if not self.database:
-            data_list_string_output = "La base de données est vide."
+            headers_string_output = "La base de données est vide."
+            data_list_string_output = ""
         else:
             self.database.sort(key=attrgetter(self.sort_by_attribute), reverse=self.sort_order)
             if self.headers:

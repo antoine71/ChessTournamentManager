@@ -29,7 +29,11 @@ class Tournament:
 
     @property
     def games(self):
-        return [game for game in [round_.games for round_ in self.rounds]]
+        games = []
+        for round_ in self.rounds:
+            for game in round_.games:
+                games.append(game)
+        return games
 
     @property
     def status(self):
@@ -182,6 +186,15 @@ class Game:
 
     def __repr__(self):
         return self.score_table.__repr__()
+
+    def __hash__(self):
+        p1, p2 = self.pair
+        return hash((p1, p2)) + hash((p2, p1))
+
+    def __eq__(self, other):
+        p1, p2 = self.pair
+        other_p1, other_p2 = other.pair
+        return (p1, p2) == (other_p2, other_p1) or (p1, p2) == (other_p2, other_p1)
 
 
 class ScoreTable:

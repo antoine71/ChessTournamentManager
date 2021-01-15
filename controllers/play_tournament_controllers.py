@@ -108,6 +108,7 @@ class ControllerDrawGames:
 
 
 class ControllerEndRound:
+    """This controller is called to end the round"""
 
     def __init__(self, tournament, round_):
         self.tournament = tournament

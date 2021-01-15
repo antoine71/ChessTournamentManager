@@ -57,6 +57,7 @@ class ControllerPlayerDatabase:
 
 
 class ControllerPlayerReport:
+    """This class manages the display the player data as a report"""
 
     def __init__(self, player, player_database):
         self.player = player
@@ -81,6 +82,7 @@ class ControllerPlayerReport:
 
 
 class ControllerUpdateRanking:
+    """This class is called to update the ranking of a player"""
 
     def __init__(self, player):
         self.player = player
@@ -92,7 +94,7 @@ class ControllerUpdateRanking:
             ViewText("Erreur de saisie, veuillez recommencer.").show()
             user_input = ViewPrompt("Veuillez saisir le nouveau classement (entier positif): ").show()
         self.player.update_ranking(user_input)
-        ViewText("Le classement du joueur {} {} a été modifié (nouveau classment: {})".format(
+        ViewText("Le classement du joueur {} {} a été modifié (nouveau classement: {})".format(
             self.player.first_name,
             self.player.last_name,
             self.player.ranking

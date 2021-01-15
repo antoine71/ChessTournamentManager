@@ -2,9 +2,9 @@
 
 from models.player import Player, PlayerDataValidator
 
-from controllers.database_management_controllers import ControllerSavePlayer
-
 from views.general_views import ViewPrompt, ViewText
+
+from controllers.database_management_controllers import ControllerSavePlayer
 
 
 class ControllerNewPlayer:
