@@ -61,7 +61,6 @@ class ControllerPlayTournament:
                                 "(s) Sauvegarder le tournoi et passer au round suivant",
                                 commands
                             ).run()
-                round_.end()
                 ViewRoundResult(round_).show()
         ViewText("Tournoi Terminé").show()
         mc.ControllerCommandInterpreter(
@@ -115,5 +114,5 @@ class ControllerEndRound:
         self.round_ = round_
 
     def run(self):
-        self.round_.end_confirmation = True
+        self.round_.end()
         ControllerSaveTournament(self.tournament).run()

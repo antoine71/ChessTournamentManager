@@ -152,6 +152,7 @@ class Round:
 
     def end(self):
         self.end_time = datetime.datetime.now()
+        self.end_confirmation = True
 
     def __repr__(self):
         return "\n".join([str(game) for game in self.games])
@@ -179,8 +180,10 @@ class Game:
     def update_score(self):
         if self.result == '1':
             self.score_table.update_score_victory(self.pair[0])
+            self.score_table.update_score_defeat(self.pair[1])
         elif self.result == '2':
             self.score_table.update_score_victory(self.pair[1])
+            self.score_table.update_score_defeat(self.pair[0])
         elif self.result == 'n':
             self.score_table.update_score_draw(*self.pair)
 
@@ -236,6 +239,9 @@ class GameScoreTable(ScoreTable):
 
     def update_score_victory(self, player):
         self.score_table[player] = 1
+
+    def update_score_defeat(self, player):
+        self.score_table[player] = 0
 
     def update_score_draw(self, player1, player2):
         self.score_table[player1] = 0.5
